@@ -2,7 +2,7 @@ library(tidyverse)  #helps wrangle data
 library(lubridate)  #helps wrangle date attributes
 library(ggplot2)  #helps visualize data
 getwd() #displays your working directory
-setwd("/Users/kappa/Desktop/Cyclistic’s historical trip data/csv") #sets your working directory to simplify calls to data ... make sure to use your OWN username instead of mine ;)
+setwd("/Users/kappa/Desktop/Cyclistic’s historical trip data0") #sets your working directory to simplify calls to data ... make sure to use your OWN username instead of mine ;)
 
 #=====================
 # STEP 1: COLLECT DATA
@@ -100,6 +100,7 @@ all_trips$month <- format(as.Date(all_trips$date), "%m")
 all_trips$day <- format(as.Date(all_trips$date), "%d")
 all_trips$year <- format(as.Date(all_trips$date), "%Y")
 all_trips$day_of_week <- format(as.Date(all_trips$date), "%A")
+all_trips$hour <- hour(all_trips$started_at)
 
 # Add a "ride_length" calculation to all_trips (in seconds)
 # https://stat.ethz.ch/R-manual/R-devel/library/base/html/difftime.html
@@ -139,7 +140,7 @@ aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = min)
 aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual + all_trips_v2$day_of_week, FUN = mean)
 
 # Notice that the days of the week are out of order. Let's fix that.
-all_trips_v2$day_of_week <- ordered(all_trips_v2$day_of_week, levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+all_trips_v2$day_of_week <- ordered(all_trips_v2$day_of_week, levels=c("星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"))
 
 # Now, let's run the average ride time by each day for members vs casual users
 aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual + all_trips_v2$day_of_week, FUN = mean)
@@ -154,11 +155,10 @@ all_trips_v2 %>%
 
 # Let's visualize the number of rides by rider type
 all_trips_v2 %>% 
-  mutate(weekday = wday(started_at, label = TRUE)) %>% 
-  group_by(member_casual, weekday) %>% 
-  summarise(number_of_rides = n()
-            ,average_duration = mean(ride_length)) %>% 
-  arrange(member_casual, weekday)  %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>%  #creates weekday field using wday()
+  group_by(member_casual, weekday) %>%  #groups by usertype and weekday
+  summarise(number_of_rides = n()) %>%  #calculates the number of rides
+  arrange(member_casual, weekday)  %>%  # sorts
   ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) +
   geom_col(position = "dodge")
 
@@ -166,9 +166,14 @@ all_trips_v2 %>%
 all_trips_v2 %>% 
   mutate(weekday = wday(started_at, label = TRUE)) %>% 
   group_by(member_casual, weekday) %>% 
-  summarise(number_of_rides = n()
-            ,average_duration = mean(ride_length)) %>% 
+  summarise(average_duration = mean(ride_length)) %>% 
   arrange(member_casual, weekday)  %>% 
   ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) +
   geom_col(position = "dodge")
 
+all_trips_v2 %>% 
+    group_by(member_casual, hour) %>% 
+    summarise(number_of_rides = n()) %>% 
+    arrange(member_casual, hour)  %>% 
+    ggplot(aes(x = hour, y = number_of_rides, fill = member_casual)) +
+    geom_bar(stat = "identity")
