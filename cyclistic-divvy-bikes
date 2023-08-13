@@ -153,7 +153,7 @@ all_trips_v2 %>%
   ,average_duration = mean(ride_length)) %>% 		# calculates the average duration
   arrange(member_casual, weekday)								# sorts
 
-# Let's visualize the number of rides by rider type
+# Visualize the number of rides by rider type
 all_trips_v2 %>% 
   mutate(weekday = wday(started_at, label = TRUE)) %>%  #creates weekday field using wday()
   group_by(member_casual, weekday) %>%  #groups by usertype and weekday
@@ -162,7 +162,7 @@ all_trips_v2 %>%
   ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) +
   geom_col(position = "dodge")
 
-# Let's create a visualization for average duration
+# Create a visualization for average duration
 all_trips_v2 %>% 
   mutate(weekday = wday(started_at, label = TRUE)) %>% 
   group_by(member_casual, weekday) %>% 
